@@ -1,0 +1,4 @@
+selenium==4.26.
+selenium-wire==5.1.0
+pymongo==4.10.
+webdriver-manager==4.0.2
