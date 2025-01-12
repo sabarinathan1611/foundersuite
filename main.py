@@ -13,7 +13,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 # from SMS import sms
-from Call import call
+# from Call import call
 import tempfile
 
 # MongoDB connection setup
