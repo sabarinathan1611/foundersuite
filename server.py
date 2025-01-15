@@ -13,7 +13,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from datetime import datetime
-
+import os
 # from SMS import sms
 # from Call import call
 import tempfile
@@ -59,28 +59,33 @@ def log_to_db(level, message):
     }
     log_collection.insert_one(log_entry)
 
+
 def setup_driver_with_buster():
-    """
-    Sets up the Selenium WebDriver with the Buster Captcha Solver extension (.crx).
-    """
     chrome_options = Options()
-    chrome_options.add_argument("--start-maximized")
+    
+    # Add headless mode and required options for headless environments
+    chrome_options.add_argument("--headless=new")  # Use improved headless mode
+    chrome_options.add_argument("--no-sandbox")  # Disable sandboxing for compatibility in containerized environments
+    chrome_options.add_argument("--disable-dev-shm-usage")  # Prevent /dev/shm from being overused
+    chrome_options.add_argument("--disable-gpu")  # Disable GPU rendering
+    chrome_options.add_argument("--remote-debugging-port=9222")  # Enable remote debugging
+    
     chrome_options.add_argument("--disable-popup-blocking")
     chrome_options.add_argument("--ignore-certificate-errors")
     chrome_options.add_argument("--disable-blink-features=AutomationControlled")
-    # chrome_options.add_argument("--headless=new")
-
-    # Path to the .crx file (Buster extension)
-    extension_path = r"HLIFKPHOLLLIJBLKNNMBFAGNKJNEAGID_0_2_1_0.crx"  # Ensure this is the correct file name
+    
+    # Path to the .crx file for the Buster extension
+    extension_path = os.path.abspath("HLIFKPHOLLLIJBLKNNMBFAGNKJNEAGID_0_2_1_0.crx")
     chrome_options.add_extension(extension_path)
+
+    # Specify Chrome binary location
+    chrome_options.binary_location = "/opt/google/chrome/chrome"
 
     # Setup WebDriver
     service = Service(ChromeDriverManager().install())
     driver = webdriver.Chrome(service=service, options=chrome_options)
 
-    # Wait for extensions to load
     time.sleep(5)
-
     # Verify that the extension is loaded by opening its popup
     try:
         logger.info("Opening Buster extension...")
@@ -92,8 +97,9 @@ def setup_driver_with_buster():
     except Exception as e:
         logger.warning(f"Failed to open Buster extension: {e}")
         log_to_db("WARNING",f"Failed to open Buster extension: {e}")
-
     return driver
+
+
 driver = setup_driver_with_buster()
 
 # Logging setup
